@@ -1,0 +1,67 @@
+import time
+import cv2
+from libs.logger import Logger
+from PIL import Image
+import numpy as np
+
+class ImageCV2:
+    
+    def __init__(self) -> None:
+        # Set up logging
+        self.logger = Logger.get_logger('gemini_vision.log')
+        
+    def open_webcam(self):
+        cap = cv2.VideoCapture(0)
+        if not cap.isOpened():
+            self.logger.error("Cannot open webcam")
+            return None
+        return cap
+
+    def capture_image(self, cap):
+        ret, frame = cap.read()
+        self.logger.info(f"Capturing image from webcam")
+        
+        if not ret:
+            self.logger.error("Cannot capture image")
+            return None
+
+        self.logger.info(f"Converting image PIL.Image")
+        # Convert the numpy.ndarray to a PIL.Image.Image
+        image = Image.fromarray(frame)
+        
+        self.logger.info(f"Converting image success")
+        return image
+    
+    def save_image(self, image, filename):
+        self.logger.info(f"Saving image to: {filename}")
+        
+        # Convert the PIL.Image.Image back to a numpy.ndarray
+        frame = np.array(image)
+        
+        # Save the image
+        cv2.imwrite(filename, frame)
+        
+    def capture_image_from_webcam(self,image_name):
+        self.logger.info(f"Capturing image from webcam")
+        time.sleep(5)
+                
+        cap = self.open_webcam()
+        
+        if cap is None:
+            self.logger.error("Cannot open webcam")
+            return None
+
+        image = self.capture_image(cap)
+        
+        # Check if frame is None
+        if image is None:
+            self.logger.error("Cannot capture image")
+            return None
+        
+        # Save the image
+        self.save_image(image, image_name)
+        self.logger.info(f"Saved image to: {image_name}")
+
+        return image
+    
+
