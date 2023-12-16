@@ -1,0 +1,10 @@
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.log
+*.csv
+*.xls
+DS_Store
+*.DS_Store
+*.pyc
