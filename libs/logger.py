@@ -14,7 +14,6 @@ def setup_logger(file_name):
     # Create a stream handler to print log messages on the console
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.INFO)
-    stream_handler.setFormatter(formatter)
 
     # Add both handlers to the logger
     logger.addHandler(file_handler)
