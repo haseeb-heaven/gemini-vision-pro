@@ -43,9 +43,10 @@ class ImageCV2:
         
     def capture_image_from_webcam(self,image_name):
         self.logger.info(f"Capturing image from webcam")
-        time.sleep(5)
+        #time.sleep(5)
                 
         cap = self.open_webcam()
+        time.sleep(1)
         
         if cap is None:
             self.logger.error("Cannot open webcam")
@@ -57,6 +58,8 @@ class ImageCV2:
         if image is None:
             self.logger.error("Cannot capture image")
             return None
+        
+        time.sleep(1)
         
         # Save the image
         self.save_image(image, image_name)

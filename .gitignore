@@ -2,6 +2,9 @@
 *.jpg
 *.jpeg
 *.gif
+*.webp
+*.ico
+*.svg
 *.log
 *.csv
 *.xls
