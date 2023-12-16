@@ -16,6 +16,7 @@ def validate_image(image_path):
         raise FileNotFoundError(f"Could not find image: {image_path}")
 
 import subprocess
+import time
 def check_file_type(file_path):
     try:
         result = subprocess.run(['file', file_path], capture_output=True, text=True)
@@ -37,21 +38,24 @@ def main():
     # Capture the image from the webcam
     web_image = None
     web_cam = ImageCV2()
-    web_image_file = "web_image.webp"
+    web_image_file = "web_image.png"
     web_image = web_cam.capture_image_from_webcam(web_image_file)
-    
-    # check if image is type of .png using `file web_image.png`
-    web_image_type = check_file_type(web_image_file)
-    logger.info(f"web_image_type: {web_image_type}")
-    
-    if "PNG image data" not in web_image_type:
-        raise ValueError(f"Image is not PNG: {web_image_type}")
-    
     if web_image is None:
         raise ValueError("Could not capture image from webcam")
     
+    # convert web_image from RGB to RGBA
+    web_image = web_image.convert("RGBA")
+    
+    # Validate that an image is present
+    image_path = Path(web_image_file)
+    validate_image(image_path)
+    
+    # Open the image
+    logger.info(f"Trying to open image: {web_image_file}")
+    web_image = Image.open(web_image_file)
+    
     logger.info(f"Initializing image prompt")
-    image_prompt = "Describe this image and what is this image about and what you see? and be very descriptive and specific."
+    image_prompt = "Describe this image and what is this image about and what you see? and be very precise and short."
     image_contents = [image_prompt,web_image]
     
     # Generate the content
@@ -63,10 +67,18 @@ def main():
         logger.info(f"Gemini:\n{response.text}")
             
 
-# Run the main function
+# Run the main function repeatedly after an interval of 15 seconds
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as exception:
-        traceback.print_exc()
-        logger.error(f"An error occurred: {str(exception)}")
+    gemini_request_count = 0
+    
+    while True:
+        try:
+            main()
+            gemini_request_count += 1
+            logger.info(f"Gemini requests: {gemini_request_count}")
+        except Exception as exception:
+            traceback.print_exc()
+            logger.error(f"An error occurred: {str(exception)}")
+        
+        # Wait for 15 seconds before running again
+        time.sleep(15)
