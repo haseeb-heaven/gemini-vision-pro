@@ -1,33 +1,18 @@
-import speech_recognition as sr
-import logging
+import deepspeech
+import numpy as np
+from libs.logger import Logger
 
-class SpeechToText:
-    """
-    A class that represents a speech-to-text converter.
-    """
+class DeepSpeechToText:
+    def __init__(self, model_path):
+        self.model = deepspeech.Model(model_path)
+        self.logger = Logger.get_logger("gemini_vision_pro.log")
 
-    def __init__(self):
-        """
-        Initialize the recognizer and the microphone.
-        """
-        self.recognizer = sr.Recognizer()
-        self.microphone = sr.Microphone()
-        self.logger = logging.getLogger(__name__)
-        logging.basicConfig(level=logging.INFO)
-
-    def listen_and_convert(self):
-        """
-        Listen to the microphone and convert the speech to text.
-        """
+    def listen_and_convert(self, audio):
         try:
-            self.logger.info("Listening to the microphone...")
-            with self.microphone as source:
-                audio = self.recognizer.listen(source)
-            self.logger.info("Converting speech to text...")
-            text = self.recognizer.recognize_google(audio)
+            self.logger.info("Converting speech to text using DeepSpeech...")
+            audio_np = np.frombuffer(audio, dtype=np.int16)
+            text = self.model.stt(audio_np)
             self.logger.info(f"Converted text: {text}")
             return text
-        except sr.UnknownValueError:
-            self.logger.error("Google Speech Recognition could not understand the audio")
-        except sr.RequestError as e:
-            self.logger.error(f"Could not request results from Google Speech Recognition service: {str(e)}")
+        except Exception as exception:
+            self.logger.error(f"Error in DeepSpeech speech recognition: {str(exception)}")

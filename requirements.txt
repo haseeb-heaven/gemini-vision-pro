@@ -4,7 +4,7 @@ opencv-python-headless
 Pillow
 protobuf
 python-dotenv
-SpeechRecognition
+deepspeech
 streamlit
 streamlit_webrtc
 google-generativeai
