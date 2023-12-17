@@ -63,19 +63,19 @@ The core AI sections of this project include:
 
 ### Webcam with live feed:
 
-<img src="https://i.ibb.co/wMLp5FX/gemini-ai-webcam.png" alt="Webcam with live feed" width="480" height="640">
+<img src="https://i.ibb.co/wMLp5FX/gemini-ai-webcam.png" alt="Webcam with live feed" width="720" height="1280">
 
 ### Gemini Ai Vision demo with object as Cap:
 
-<img src="https://i.ibb.co/1zk68bV/gemini-ai-demo2.png" alt="Gemini Ai Vision Cap" width="480" height="640">
+<img src="https://i.ibb.co/1zk68bV/gemini-ai-demo2.png" alt="Gemini Ai Vision Cap" width="720" height="1280">
 
 ### Gemini Ai Vision demo with Hand:
 
-<img src="https://i.ibb.co/BnzB1B9/gemini-ai-demo3.png" alt="Gemini Ai Vision Hand" width="480" height="640">
+<img src="https://i.ibb.co/BnzB1B9/gemini-ai-demo3.png" alt="Gemini Ai Vision Hand" width="720" height="1280">
 
 ### Gemini Ai Vision demo with Gesture:
 
-<img src="https://i.ibb.co/kJ9LHrH/gemini-ai-demo4.png" alt="Gemini Ai Vision Gesture" width="480" height="640">
+<img src="https://i.ibb.co/kJ9LHrH/gemini-ai-demo4.png" alt="Gemini Ai Vision Gesture" width="720" height="1280">
 
 
 ## **Packages Used**
