@@ -66,8 +66,8 @@ def process_image():
     #st.session_state['prompt'] = f"{st.session_state['prompt']}, In just 20 words be very concise and clear"
     image_prompt = st.session_state['prompt']
     web_image = st.session_state['captured_image']
-    st.info(f"Type of web_image: {type(web_image)}")
-    st.info(f"Data of web_image: {web_image}")
+    st.session_state.logger.info(f"Type of web_image: {type(web_image)}")
+    st.session_state.logger.info(f"Data of web_image: {web_image}")
     
     image_contents = [st.session_state['prompt'], st.session_state['captured_image']]
     st.session_state.logger.info(f"Image data is: {st.session_state['captured_image']}")
@@ -90,17 +90,17 @@ def get_prompt_from_mic():
 def log_webrtc_context_states(webrtc_ctx):
     if webrtc_ctx is not None:
         # Log the state of the WebRTC context
-        st.info(f"WebRTC context: {webrtc_ctx}")
-        st.info(f"Is WebRTC playing: {webrtc_ctx.state.playing}")
-        st.info(f"Is audio receiver ready: {webrtc_ctx.audio_receiver}")
-        st.info(f"Is video receiver ready: {webrtc_ctx.video_receiver}")
+        st.session_state.logger.info(f"WebRTC context: {webrtc_ctx}")
+        st.session_state.logger.info(f"Is WebRTC playing: {webrtc_ctx.state.playing}")
+        st.session_state.logger.info(f"Is audio receiver ready: {webrtc_ctx.audio_receiver}")
+        st.session_state.logger.info(f"Is video receiver ready: {webrtc_ctx.video_receiver}")
     else:
         st.error("WebRTC context is None.")
 
 
 @exception_handler
 def capture_image():
-    st.info("Attempting to capture image from webcam with ImageCV2...")
+    st.session_state.logger.info("Attempting to capture image from webcam with ImageCV2...")
     
     # Capture the image from the webcam
     web_image = None
@@ -125,7 +125,7 @@ def capture_image():
 
 # Streamlit App
 def streamlit_app():
-    st.title("Gemini Vision Streamlit App")
+    st.title("Gemini Vision App")
     
     # Initialize logger and services once
     if st.session_state.logger is None:
@@ -141,14 +141,6 @@ def streamlit_app():
                                                       top_k=st.session_state['top_k'])
     
 
-    # Main Page
-    enable_mic = st.checkbox("Enable Microphone")
-    if enable_mic and st.button("Get Prompt from Mic"):
-        st.session_state['prompt'] = get_prompt_from_mic()
-
-    prompt = st.text_input("Enter prompt", value=st.session_state.get('prompt', ''))
-    st.session_state['prompt'] = prompt  # Update session state
-
     # WebRTC streamer
     webrtc_ctx = webrtc_streamer(
                 key="webcam", 
@@ -157,30 +149,39 @@ def streamlit_app():
                 video_frame_callback=lambda frame: None
             )
    
-    capture_button = st.button("Capture Image")
-    send_button = st.button("Gemini Vision")
+    capture_button,_, send_button = st.columns(3)
 
-    if capture_button:
-        st.session_state['captured_image'] = capture_image()
-        if st.session_state['captured_image'] is not None:
-            st.image(st.session_state['captured_image'], width=300, caption="Captured Image")
-            st.toast("Image captured successfully!")
-        else:
-            st.warning("Failed to capture image. Please try again.")
-        
-    if send_button and st.session_state['captured_image'] is not None:
-        process_image()
-        
-    elif send_button:
-        st.warning("Please capture an image first.")
-        
+    with capture_button:
+        if st.button("Capture Image"):
+            st.session_state['captured_image'] = capture_image()
+            if st.session_state['captured_image'] is not None:
+                st.toast("Image captured successfully!")
+            else:
+                st.warning("Failed to capture image. Please try again.")
+
+    with send_button:
+        if st.button("Gemini Vision", key='button1') and st.session_state['captured_image'] is not None:
+            process_image()
+    
+    # if image is captured then display it
+    if st.session_state['captured_image'] is not None:
+        st.image(st.session_state['captured_image'], caption="Captured Image", use_column_width=True)
+    
+    # Main Page
+    enable_mic = st.checkbox("Microphone")
+    if enable_mic and st.button("Speak Prompt"):
+        st.session_state['prompt'] = get_prompt_from_mic()
+
+    prompt = st.text_input("Enter prompt", value=st.session_state.get('prompt', ''))
+    st.session_state['prompt'] = prompt  # Update session state
+    
     # # Configure Gemini Vision settings from the sidebar
     with st.sidebar.title("Settings"):
         st.session_state.api_key = st.sidebar.text_input("API Key", type="password")
-        st.session_state.temperature = st.sidebar.slider("Temperature", 0.0, 1.0, 0.9)
-        st.session_state.top_k = st.sidebar.number_input("Top K", value=1)
+        st.session_state.temperature = st.sidebar.slider("Temperature", 0.0, 1.0, 0.3)
+        st.session_state.top_k = st.sidebar.number_input("Top K", value=32)
         st.session_state.top_p = st.sidebar.slider("Top P", 0.0, 1.0, 1.0)
-        st.session_state.gemini_vision = GeminiVision(st.session_state.api_key, st.session_state.temperature, st.session_state.top_k, st.session_state.top_p)
+        st.session_state.gemini_vision = GeminiVision(st.session_state.api_key, st.session_state.temperature, st.session_state.top_p, st.session_state.top_k)
 
         st.toast("Settings updated successfully!")
         

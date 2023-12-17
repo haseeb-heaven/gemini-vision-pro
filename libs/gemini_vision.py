@@ -12,7 +12,7 @@ class GeminiVision:
         self.api_key = api_key
         self.temperature = temperature
         self.top_p = top_p
-        self.top_k = int(top_k)
+        self.top_k = top_k
         self.max_output_tokens = max_output_tokens
         
         self.logger.info(f"temperature: {self.temperature}")
