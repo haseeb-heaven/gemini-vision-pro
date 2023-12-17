@@ -4,10 +4,10 @@ openai_whisper
 opencv_python
 opencv_python_headless
 Pillow
-Pillow
 protobuf
 python-dotenv
 sounddevice
 streamlit
 streamlit_webrtc
 wavio
+google-generativeai
