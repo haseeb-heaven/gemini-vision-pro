@@ -1,1 +1,2 @@
 libgl1
+portaudio19-dev
