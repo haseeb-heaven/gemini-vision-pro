@@ -1,20 +1,37 @@
-# 📌 **Google Gemini Vision Pro**
+<img src="https://www.gettingstarted.ai/content/images/2023/12/GS-Beginner-Guide-Using-Google-Gemini-Pro-Vision-Google-AI-Studio.png" alt="Gemini Vision Pro Logo" width="640" height="480">
 
-![Gemini Vision Pro Logo](insert_image_url_here)
+
 <a href="https://www.buymeacoffee.com/haseebheaven"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=haseebheaven&button_colour=40DCA5&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" /></a>
 
 
 🚀 **_Description:_** 🚀 This is the amazing Google Gemini Vision Pro 📸, a powerful tool that scans images, generates descriptions using Gemini AI Pro Vision API, and provides speech feedback 🗣️. It also captures images using the webcam 🖥️.
 
-#️⃣ #GoogleGeminiVisionPro #ImageProcessing #SpeechRecognition #TextToSpeech #AI
-
 ## 🌟 **Introduction** 🌟
 
 Google Gemini Vision Pro is a versatile application that combines image processing 🖼️, speech recognition 🎤, and text-to-speech capabilities 📢. With this application, you can capture images using your webcam 📷, convert spoken words to text 📝, generate image descriptions 📚, and even have the descriptions spoken back to you 📣.
 
-#️⃣ #WebcamCapture #SpeechToText #ImageDescription #AI
-
 ## **Installation Guide**
+
+### **_Step 1: Clone the repository_**
+
+```bash
+git clone https://github.com/haseeb-heaven/Gemini-Vision-Pro
+cd Gemini-Vision-Pro
+```
+
+## **_Step 2: Install the dependencies_**
+
+```bash
+pip install -r requirements.txt
+```
+
+## **_Step 3: Run the application_**
+
+```bash
+streamlit run script.py
+```
+
+## **_Step 4: Obtain the Google Palm API key and Setup the application_**
 
 1. **_Obtain the Google Palm API key._**
 2. Visit the following URL: [Google AI Studio](https://makersuite.google.com/app/apikey)
@@ -22,6 +39,8 @@ Google Gemini Vision Pro is a versatile application that combines image processi
 4. The generated key is your API key. Please make sure to **_copy it and paste it in the application settings_**.
 5. The API key is crucial for the functioning, **_Please ensure to keep it safe and do not share it with anyone_**.
 
+### Gemini AI settings:
+<img src="https://i.ibb.co/Jpj1pc6/gemini-ai-settings.png" alt="Gemini Settings" width="340" height="240">
 
 ## **AI Sections**
 
@@ -42,15 +61,22 @@ The core AI sections of this project include:
 
 ## **WebUI - Application Showcase**
 
-(Include screenshots or GIFs of your application's user interface here)
+### Webcam with live feed:
 
-## **Vertex AI Integration**
+<img src="https://i.ibb.co/wMLp5FX/gemini-ai-webcam.png" alt="Webcam with live feed" width="480" height="640">
 
-(Explain how Vertex AI is integrated into your project, if applicable)
+### Gemini Ai Vision demo with object as Cap:
 
-## 📸 **Image Showcase**
+<img src="https://i.ibb.co/1zk68bV/gemini-ai-demo2.png" alt="Gemini Ai Vision Cap" width="480" height="640">
 
-(Include images of the application in action, e.g., sample images processed and described)
+### Gemini Ai Vision demo with Hand:
+
+<img src="https://i.ibb.co/BnzB1B9/gemini-ai-demo3.png" alt="Gemini Ai Vision Hand" width="480" height="640">
+
+### Gemini Ai Vision demo with Gesture:
+
+<img src="https://i.ibb.co/kJ9LHrH/gemini-ai-demo4.png" alt="Gemini Ai Vision Gesture" width="480" height="640">
+
 
 ## **Packages Used**
 
@@ -64,8 +90,10 @@ This project relies on various Python packages, including:
 - google.cloud.speech - Part of Google Cloud services for speech-to-text conversion
 
 ## 📚 **Links and References**
-
-(Provide links to relevant documentation, articles, or resources here)
+Follow these links for **Google Gemini Vision Pro** related content:
+- [**Google AI Studio**](https://makersuite.google.com/app/apikey)
+- [**Google Gemini Vision Pro**](https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/gemini)
+- [**Google Gemini Deepmind**](https://deepmind.google/technologies/gemini/)
 
 ## **Versioning**
 

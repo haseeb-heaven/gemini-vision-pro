@@ -171,6 +171,10 @@ def streamlit_app():
     # Display support
     display_support()
     
+    # Initialize logger
+    if st.session_state.logger is None:
+        st.session_state.logger = Logger.get_logger('gemini_vision_pro.log')
+        
     # Display the Gemini Sidebar settings
     with st.sidebar.title("Gemini Settings"):
         st.session_state.api_key = st.sidebar.text_input("API Key", type="password")
@@ -179,11 +183,16 @@ def streamlit_app():
         st.session_state.top_p = st.sidebar.slider("Top P", 0.0, 1.0, 1.0)
         st.session_state.gemini_vision = GeminiVision(st.session_state.api_key, st.session_state.temperature, st.session_state.top_p, st.session_state.top_k)
 
-        st.toast("Settings updated successfully!")
-    
-    # Initialize logger and services once
-    if st.session_state.logger is None:
-        st.session_state.logger = Logger.get_logger('gemini_vision_pro.log')
+        if (st.session_state.api_key is not None and st.session_state.api_key != '') \
+            and (st.session_state.temperature is not None and st.session_state.temperature != '') \
+            and (st.session_state.top_k is not None and st.session_state.top_k != '') \
+            and (st.session_state.top_p is not None and st.session_state.top_p != ''):
+            st.toast("Settings updated successfully!", icon="👍")
+        else:
+            st.toast("Please enter all the settings.\nAPI Key is required", icon="❌")
+            raise ValueError("Please enter all values the settings.\nAPI Key is required")
+        
+    # Initialize services once
     if st.session_state.tts is None:
         st.session_state.tts = TextToSpeech()
     if st.session_state.stt is None:
@@ -211,13 +220,13 @@ def streamlit_app():
             # Validate API Key
             if st.session_state.api_key is None or st.session_state.api_key == '':
                 st.toast("Please enter API Key in the sidebar.", icon="❌")
-                raise ValueError("API Key is not present.")
-            
-            st.session_state['captured_image'] = capture_image()
-            if st.session_state['captured_image'] is not None:
-                st.toast("Image captured successfully!")
+                
             else:
-                st.warning("Failed to capture image. Please try again.")
+                st.session_state['captured_image'] = capture_image()
+                if st.session_state['captured_image'] is not None:
+                    st.toast("Image captured successfully!")
+                else:
+                    st.warning("Failed to capture image. Please try again.")
 
     # Main Page
     with col2:
@@ -226,22 +235,23 @@ def streamlit_app():
             # Validate API Key
             if st.session_state.api_key is None or st.session_state.api_key == '':
                 st.toast("Please enter API Key in the sidebar.", icon="❌")
-                raise ValueError("API Key is not present.")
-            st.session_state['prompt'] = get_prompt_from_mic()
+            else:
+                st.session_state['prompt'] = get_prompt_from_mic()
             
     with col3:
         if st.button("Ask Gemini") and st.session_state['captured_image'] is not None:
+            
             # Validate API Key
             if st.session_state.api_key is None or st.session_state.api_key == '':
                 st.toast("Please enter API Key in the sidebar.", icon="❌")
-                raise ValueError("API Key is not present.")
-            
-            # Check if image is captured
-            if st.session_state['captured_image'] is None:
-                st.toast("Please capture image first.", icon="❌")
-                raise ValueError("Image is not captured.")
-            
-            process_image()
+            elif st.session_state.prompt is None or st.session_state.prompt == '':
+                st.toast("Please enter prompt first.", icon="❌")
+            else:
+                # Check if image is captured
+                if st.session_state['captured_image'] is None:
+                    st.toast("Please capture image first.", icon="❌")
+                else:
+                    process_image()
     
     prompt = st.text_area(placeholder="Prompt:",label="Prompt",label_visibility="hidden",height=10,value=st.session_state.get('prompt',st.session_state['prompt']))
     st.session_state['prompt'] = prompt  # Update session state
@@ -252,7 +262,7 @@ def streamlit_app():
     
     # if response is present then display it
     if 'response' in st.session_state:
-        st.write(f"Response: {st.session_state['response']}")
+        st.code(f"Gemini AI: {st.session_state['response']}", language="python")
                     
 if __name__ == "__main__":
     try:
