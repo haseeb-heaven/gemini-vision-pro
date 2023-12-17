@@ -1,3 +1,4 @@
+import os
 import time
 from libs.logger import Logger
 from libs.gemini_vision import GeminiVision
@@ -9,6 +10,7 @@ import traceback
 from libs.speech import SpeechToText
 from libs.voice import TextToSpeech
 import threading
+from dotenv import load_dotenv
 
 # Set up logging
 logger = Logger.get_logger('gemini_vision.log')
@@ -30,16 +32,14 @@ def check_file_type(file_path):
 
 def main():
     logger.info("Starting Gemini Vision")
-    gemini_vision = GeminiVision()
+    load_dotenv()
+    api_key = os.getenv("GEMINI_API_KEY")
+    
+    gemini_vision = GeminiVision(api_key,temperature=0.1,top_p=1,top_k=32,max_output_tokens=4096)
     tts = TextToSpeech()
     stt = SpeechToText()
     image_prompt = None
-    
-    # Configure GenAI
-    gemini_vision.configure_genai()
 
-    # Setup the model
-    gemini_vision.setup_model(temperature=0.1,top_p=1,top_k=32,max_output_tokens=4096)
 
     # Capture the image from the webcam
     web_image = None

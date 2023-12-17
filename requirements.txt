@@ -7,3 +7,5 @@ pyobjc
 python-dotenv
 SpeechRecognition
 PyAudio
+streamlit
+streamlit-webrtc
