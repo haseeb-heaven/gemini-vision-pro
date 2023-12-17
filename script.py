@@ -271,8 +271,8 @@ def update_pip():
     subprocess.check_call(["python", "-m", "pip", "install", "--upgrade", "pip"])
 
 def install_libgl():
-    subprocess.run(['sudo', 'apt-get', 'update'], check=True)
-    subprocess.run(['sudo', 'apt-get', 'install', '-y', 'libgl1-mesa-glx'], check=True)
+    subprocess.run(['apt-get', 'update'], check=True)
+    subprocess.run(['apt-get', 'install', '-y', 'libgl1-mesa-glx'], check=True)
     
 # create method to install required packages using subprocess
 def install_packages():
@@ -282,12 +282,17 @@ def install_package(package_name):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
 
 def install_system_package(package_name):
-    subprocess.check_call(["sudo", "apt-get", "install", "-y", package_name])
+    subprocess.check_call(["apt-get", "install", "-y", package_name])
 
+# Function to create packages.txt with the required package
+def create_packages_file():
+    with open("packages.txt", "w") as file:
+        file.write("libgl1\n")
 
 if __name__ == "__main__":
     try:
         init_session_state()
+        create_packages_file()
         # Install Python package
         install_package("opencv-python-headless")
 
@@ -297,6 +302,7 @@ if __name__ == "__main__":
         update_pip()
         install_packages()
         streamlit_app()
+        
     except Exception as exception:
         import traceback
         st.session_state.logger.error(f"An error occurred: {exception}")
