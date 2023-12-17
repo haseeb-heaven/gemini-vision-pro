@@ -1,18 +1,42 @@
-import deepspeech
+import sounddevice as sd
 import numpy as np
-from libs.logger import Logger
+import whisper
+import logging
+import wavio
 
-class DeepSpeechToText:
-    def __init__(self, model_path):
-        self.model = deepspeech.Model(model_path)
-        self.logger = Logger.get_logger("gemini_vision_pro.log")
+class SpeechToText:
+    """
+    A class that represents a speech-to-text converter using OpenAI's Whisper.
+    """
 
-    def listen_and_convert(self, audio):
+    def __init__(self, duration=5, fs=44100):
+        self.model = whisper.load_model("base")
+        self.duration = duration
+        self.fs = fs
+        self.logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.INFO)
+
+    def record_audio(self):
+        """
+        Record audio from the microphone.
+        """
+        self.logger.info("Recording audio...")
+        recording = sd.rec(int(self.duration * self.fs), samplerate=self.fs, channels=1)
+        sd.wait()
+        return recording
+
+    def listen_and_convert(self):
+        """
+        Convert the recorded audio to text using Whisper.
+        """
         try:
-            self.logger.info("Converting speech to text using DeepSpeech...")
-            audio_np = np.frombuffer(audio, dtype=np.int16)
-            text = self.model.stt(audio_np)
+            recording = self.record_audio()
+            # Save the recording temporarily
+            wavio.write("temp.wav", recording, self.fs, sampwidth=2)
+            # Transcribe the audio file
+            result = self.model.transcribe("temp.wav")
+            text = result["text"]
             self.logger.info(f"Converted text: {text}")
             return text
-        except Exception as exception:
-            self.logger.error(f"Error in DeepSpeech speech recognition: {str(exception)}")
+        except Exception as e:
+            self.logger.error(f"Error in Whisper speech recognition: {str(e)}")

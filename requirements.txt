@@ -1,10 +1,13 @@
 gTTS
 numpy
-opencv-python-headless
+openai_whisper
+opencv_python
+opencv_python_headless
+Pillow
 Pillow
 protobuf
 python-dotenv
-deepspeech
+sounddevice
 streamlit
 streamlit_webrtc
-google-generativeai
+wavio
