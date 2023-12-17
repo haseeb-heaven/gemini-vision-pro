@@ -270,36 +270,7 @@ def streamlit_app():
 def update_pip():
     subprocess.check_call(["python", "-m", "pip", "install", "--upgrade", "pip"])
 
-def install_libgl():
-    try:
-        subprocess.run(['apt-get', 'update'], check=True)
-        subprocess.run(['apt-get', 'install', '-y', 'libgl1-mesa-glx'], check=True)
-    except Exception as exception:
-        st.toast(f"An error occurred during installation of libgl: {exception}", icon="❌")
-        st.toast(traceback.format_exc())
-        
-# create method to install required packages using subprocess
-def install_packages():
-    try:
-        subprocess.check_call(["python", "-m", "pip", "install", "-r", "requirements.txt"])
-    except Exception as exception:
-        st.toast(f"An error occurred during installation of packages: {exception}", icon="❌")
-        st.toast(traceback.format_exc())
-
-def install_package(package_name):
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
-    except Exception as exception:
-        st.toast(f"An error occurred during installation of package {package_name}: {exception}", icon="❌")
-        st.toast(traceback.format_exc())
-
-def install_system_package(package_name):
-    try:
-        subprocess.check_call(["apt-get", "install", "-y", package_name])
-    except Exception as exception:
-        st.toast(f"An error occurred during installation of system package {package_name}: {exception}", icon="❌")
-        st.toast(traceback.format_exc())
-
+# Main method
 if __name__ == "__main__":
     try:
         init_session_state()
