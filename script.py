@@ -1,56 +1,106 @@
-import os
-import time
-from libs.logger import Logger
-from libs.gemini_vision import GeminiVision
-from libs.image_cv2 import ImageCV2
-from pathlib import Path
+import streamlit as st
+from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
+import cv2
+import io
 from PIL import Image
 from io import BytesIO
+from pathlib import Path
 import traceback
+from libs.logger import Logger
+from libs.gemini_vision import GeminiVision
 from libs.speech import SpeechToText
 from libs.voice import TextToSpeech
-import threading
-from dotenv import load_dotenv
+from libs.image_cv2 import ImageCV2
 
-# Set up logging
-logger = Logger.get_logger('gemini_vision.log')
+# Initialize session state
+def init_session_state():
+    if 'api_key' not in st.session_state:
+        st.session_state['api_key'] = ''
+    if 'temperature' not in st.session_state:
+        st.session_state['temperature'] = 0.1
+    if 'top_k' not in st.session_state:
+        st.session_state['top_k'] = 32
+    if 'top_p' not in st.session_state:
+        st.session_state['top_p'] = 1.0
+    if 'captured_image' not in st.session_state:
+        st.session_state['captured_image'] = None
+    if 'prompt' not in st.session_state:
+        st.session_state['prompt'] = ''
+    if 'api_key' not in st.session_state:
+        st.session_state['api_key'] = ''
+    if 'captured_image' not in st.session_state:
+        st.session_state['captured_image'] = None
+    if 'prompt' not in st.session_state:
+        st.session_state['prompt'] = ''
+    if "logger" not in st.session_state:
+        st.session_state["logger"] = None
+    if "tts" not in st.session_state:
+        st.session_state["tts"] = None
+    if "stt" not in st.session_state:
+        st.session_state["stt"] = None
+    if "gemini_vision" not in st.session_state:
+        st.session_state["gemini_vision"] = None
+    if "webrtc_ctx" not in st.session_state:
+        st.session_state["webrtc_ctx"] = None
 
+# Exception handling decorator
+def exception_handler(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as exception:
+            st.session_state.logger.error(f"An error occurred in {func.__name__}: {exception}")
+            st.error(f"An error occurred: {exception}")
+            st.session_state.logger.error(traceback.format_exc())
+            st.stop()
+    return wrapper
+
+@exception_handler
 def validate_image(image_path):
     if not image_path.exists():
-        logger.error(f"Could not find image: {image_path}")
+        st.session_state.logger.error(f"Could not find image: {image_path}")
         raise FileNotFoundError(f"Could not find image: {image_path}")
 
-import subprocess
-import time
-def check_file_type(file_path):
-    try:
-        result = subprocess.run(['file', file_path], capture_output=True, text=True)
-        return result.stdout
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-
-def main():
-    logger.info("Starting Gemini Vision")
-    load_dotenv()
-    api_key = os.getenv("GEMINI_API_KEY")
+@exception_handler
+def process_image():    
+    image_contents = [st.session_state['prompt'], st.session_state['captured_image']]
+    st.session_state.logger.info(f"Image data is: {st.session_state['captured_image']}")
     
-    gemini_vision = GeminiVision(api_key,temperature=0.1,top_p=1,top_k=32,max_output_tokens=4096)
-    tts = TextToSpeech()
-    stt = SpeechToText()
-    image_prompt = None
+    response = st.session_state.gemini_vision.generate_content(image_contents)
+    
+    if 'error' in response:
+        raise ValueError(f"An error occurred: {response}")
+    else:
+        if response.text:
+            st.session_state.tts.speak(response.text)
+            st.markdown(response.text)
+            st.session_state['captured_image'] = None # reset captured image
+            
+@exception_handler
+def get_prompt_from_mic():
+    prompt = st.session_state.stt.listen_and_convert()
+    return prompt
+
+@exception_handler
+def log_webrtc_context_states(webrtc_ctx):
+    if webrtc_ctx is not None:
+        # Log the state of the WebRTC context
+        st.session_state.logger.info(f"WebRTC context: {webrtc_ctx}")
+        st.session_state.logger.info(f"Is WebRTC playing: {webrtc_ctx.state.playing}")
+        st.session_state.logger.info(f"Is audio receiver ready: {webrtc_ctx.audio_receiver}")
+        st.session_state.logger.info(f"Is video receiver ready: {webrtc_ctx.video_receiver}")
+    else:
+        st.error("WebRTC context is None.")
 
 
+@exception_handler
+def capture_image():
+    st.session_state.logger.info("Attempting to capture image from webcam with ImageCV2...")
+    
     # Capture the image from the webcam
     web_image = None
     web_cam = ImageCV2()
-
-    # Start the webcam feed
-    web_cam.show_webcam_feed
-    
-    # Stop the webcam feed after 5 seconds
-    threading.Thread(target=web_cam.stop_webcam_feed,args=(5,)).start()
-
+ 
     web_image_file = "web_image.png"
     web_image = web_cam.capture_image_from_webcam(web_image_file)
     if web_image is None:
@@ -64,42 +114,79 @@ def main():
     validate_image(image_path)
     
     # Open the image
-    logger.info(f"Trying to open image: {web_image_file}")
+    st.session_state.logger.info(f"Trying to open image: {web_image_file}")
     web_image = Image.open(web_image_file)
+    return web_image
+
+# Streamlit App
+def streamlit_app():
+    st.title("Gemini Vision App")
     
-    # Get the prompt from Speech to Text
-    logger.info(f"Please enter the image prompt")
-    if image_prompt is None:
-        image_prompt = stt.listen_and_convert()
+    # Initialize logger and services once
+    if st.session_state.logger is None:
+        st.session_state.logger = Logger.get_logger('gemini_vision_pro.log')
+    if st.session_state.tts is None:
+        st.session_state.tts = TextToSpeech()
+    if st.session_state.stt is None:
+        st.session_state.stt = SpeechToText()
+    if st.session_state.gemini_vision is None:
+        st.session_state.gemini_vision = GeminiVision(api_key=st.session_state['api_key'],
+                                                      temperature=st.session_state['temperature'],
+                                                      top_p=st.session_state['top_p'],
+                                                      top_k=st.session_state['top_k'])
     
-    image_prompt += "In just 20 words be very consise and clear"
-    
-    logger.info(f"Initializing image prompt")
-    #image_prompt = "Describe this image and what is this image about and what you see?,In just 10 words be very consise and clear"
-    image_contents = [image_prompt,web_image]
-    
-    # Generate the content
-    logger.info(f"Generating Image content")
-    response = gemini_vision.generate_content(image_contents)
-    if 'error' in response:
-        raise ValueError(f"An error occurred: {response}")
-    else:
-        if response.text:
-            logger.info(f"Gemini:\n{response.text}")
-            tts.speak(response.text)
+
+    # WebRTC streamer only if image is not captured
+    webrtc_ctx = webrtc_streamer(
+                key="webcam", 
+                mode=WebRtcMode.SENDRECV, 
+                rtc_configuration=RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}),
+                video_frame_callback=lambda frame: None
+            )
+   
+    col1, col2,_,col3 = st.columns(4)
+
+    with col1:
+        if st.button("Capture Image"):
+            st.session_state['captured_image'] = capture_image()
+            if st.session_state['captured_image'] is not None:
+                st.toast("Image captured successfully!")
+            else:
+                st.warning("Failed to capture image. Please try again.")
+
+    # Main Page
+    with col2:
+        if st.button("Speak Prompt"):
+            st.session_state['prompt'] = get_prompt_from_mic()
             
-# Run the main function repeatedly after an interval of 15 seconds
-if __name__ == "__main__":
-    gemini_request_count = 0
+    with col3:
+        if st.button("Ask Gemini") and st.session_state['captured_image'] is not None:
+            process_image()
     
-    while True:
-        try:
-            main()
-            gemini_request_count += 1
-            logger.info(f"Gemini requests: {gemini_request_count}")
-        except Exception as exception:
-            traceback.print_exc()
-            logger.error(f"An error occurred: {str(exception)}")
+    prompt = st.text_area(placeholder="Prompt:",label="Prompt",label_visibility="hidden",height=10,value=st.session_state.get('prompt',st.session_state['prompt']))
+    st.session_state['prompt'] = prompt  # Update session state
+    
+    # if image is captured then display it
+    if st.session_state['captured_image'] is not None:
+        st.image(st.session_state['captured_image'], caption="Captured Image", use_column_width=True)
+            
+    # # Configure Gemini Vision settings from the sidebar
+    with st.sidebar.title("Settings"):
+        st.session_state.api_key = st.sidebar.text_input("API Key", type="password")
+        st.session_state.temperature = st.sidebar.slider("Temperature", 0.0, 1.0, 0.3)
+        st.session_state.top_k = st.sidebar.number_input("Top K", value=32)
+        st.session_state.top_p = st.sidebar.slider("Top P", 0.0, 1.0, 1.0)
+        st.session_state.gemini_vision = GeminiVision(st.session_state.api_key, st.session_state.temperature, st.session_state.top_p, st.session_state.top_k)
+
+        st.toast("Settings updated successfully!")
         
-        # Wait for 1 seconds before running again
-        time.sleep(1)
+        
+if __name__ == "__main__":
+    try:
+        init_session_state()
+        streamlit_app()
+    except Exception as exception:
+        import traceback
+        st.session_state.logger.error(f"An error occurred: {exception}")
+        st.session_state.logger.error(traceback.format_exc())
+        st.error(f"An error occurred: {exception}")
