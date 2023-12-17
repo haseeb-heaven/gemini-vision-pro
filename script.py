@@ -271,23 +271,43 @@ def update_pip():
     subprocess.check_call(["python", "-m", "pip", "install", "--upgrade", "pip"])
 
 def install_libgl():
-    subprocess.run(['apt-get', 'update'], check=True)
-    subprocess.run(['apt-get', 'install', '-y', 'libgl1-mesa-glx'], check=True)
-    
+    try:
+        subprocess.run(['apt-get', 'update'], check=True)
+        subprocess.run(['apt-get', 'install', '-y', 'libgl1-mesa-glx'], check=True)
+    except Exception as exception:
+        st.error(f"An error occurred during installation of libgl: {exception}")
+        st.error(traceback.format_exc())
+        
 # create method to install required packages using subprocess
 def install_packages():
-    subprocess.check_call(["python", "-m", "pip", "install", "-r", "requirements.txt"])
+    try:
+        subprocess.check_call(["python", "-m", "pip", "install", "-r", "requirements.txt"])
+    except Exception as exception:
+        st.error(f"An error occurred during installation of packages: {exception}")
+        st.error(traceback.format_exc())
 
 def install_package(package_name):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+    except Exception as exception:
+        st.error(f"An error occurred during installation of package {package_name}: {exception}")
+        st.error(traceback.format_exc())
 
 def install_system_package(package_name):
-    subprocess.check_call(["apt-get", "install", "-y", package_name])
+    try:
+        subprocess.check_call(["apt-get", "install", "-y", package_name])
+    except Exception as exception:
+        st.error(f"An error occurred during installation of system package {package_name}: {exception}")
+        st.error(traceback.format_exc())
 
 # Function to create packages.txt with the required package
 def create_packages_file():
-    with open("packages.txt", "w") as file:
-        file.write("libgl1\n")
+    try:
+        with open("packages.txt", "w") as file:
+            file.write("libgl1\n")
+    except Exception as exception:
+        print(f"An error occurred during creation of packages file: {exception}")
+        print(traceback.format_exc())
 
 if __name__ == "__main__":
     try:
