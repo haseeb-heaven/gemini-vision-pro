@@ -6,7 +6,10 @@ from pathlib import Path
 from PIL import Image
 from io import BytesIO
 import traceback
-        
+from libs.speech import SpeechToText
+from libs.voice import TextToSpeech
+import threading
+
 # Set up logging
 logger = Logger.get_logger('gemini_vision.log')
 
@@ -28,7 +31,10 @@ def check_file_type(file_path):
 def main():
     logger.info("Starting Gemini Vision")
     gemini_vision = GeminiVision()
-
+    tts = TextToSpeech()
+    stt = SpeechToText()
+    image_prompt = None
+    
     # Configure GenAI
     gemini_vision.configure_genai()
 
@@ -38,6 +44,13 @@ def main():
     # Capture the image from the webcam
     web_image = None
     web_cam = ImageCV2()
+
+    # Start the webcam feed
+    web_cam.show_webcam_feed
+    
+    # Stop the webcam feed after 5 seconds
+    threading.Thread(target=web_cam.stop_webcam_feed,args=(5,)).start()
+
     web_image_file = "web_image.png"
     web_image = web_cam.capture_image_from_webcam(web_image_file)
     if web_image is None:
@@ -54,8 +67,15 @@ def main():
     logger.info(f"Trying to open image: {web_image_file}")
     web_image = Image.open(web_image_file)
     
+    # Get the prompt from Speech to Text
+    logger.info(f"Please enter the image prompt")
+    if image_prompt is None:
+        image_prompt = stt.listen_and_convert()
+    
+    image_prompt += "In just 20 words be very consise and clear"
+    
     logger.info(f"Initializing image prompt")
-    image_prompt = "Describe this image and what is this image about and what you see? and be very precise and short."
+    #image_prompt = "Describe this image and what is this image about and what you see?,In just 10 words be very consise and clear"
     image_contents = [image_prompt,web_image]
     
     # Generate the content
@@ -64,9 +84,10 @@ def main():
     if 'error' in response:
         raise ValueError(f"An error occurred: {response}")
     else:
-        logger.info(f"Gemini:\n{response.text}")
+        if response.text:
+            logger.info(f"Gemini:\n{response.text}")
+            tts.speak(response.text)
             
-
 # Run the main function repeatedly after an interval of 15 seconds
 if __name__ == "__main__":
     gemini_request_count = 0
@@ -80,5 +101,5 @@ if __name__ == "__main__":
             traceback.print_exc()
             logger.error(f"An error occurred: {str(exception)}")
         
-        # Wait for 15 seconds before running again
-        time.sleep(15)
+        # Wait for 1 seconds before running again
+        time.sleep(1)

@@ -3,6 +3,7 @@ import cv2
 from libs.logger import Logger
 from PIL import Image
 import numpy as np
+import pyautogui
 
 class ImageCV2:
     
@@ -67,4 +68,26 @@ class ImageCV2:
 
         return image
     
+    def show_webcam_feed(self):
+        # Open the webcam (0 is the default webcam)
+        cap = cv2.VideoCapture(0)
+
+        while True:
+            # Capture frame-by-frame
+            ret, frame = cap.read()
+
+            # Display the resulting frame
+            cv2.imshow('Webcam Feed', frame)
+
+            # Break the loop on 'q' key press
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        # When everything is done, release the capture and destroy the window
+        cap.release()
+        cv2.destroyAllWindows()
+        
+    def stop_webcam_feed(self,interval):
+        time.sleep(interval)
+        pyautogui.press('q')
 

@@ -1,3 +1,9 @@
 google-generativeai
 pillow
 opencv-python
+pyttsx3
+gTTS
+pyobjc
+python-dotenv
+SpeechRecognition
+PyAudio
