@@ -6,13 +6,19 @@ from libs.logger import Logger
 
 class GeminiVision:
     def __init__(self,api_key=None,temperature=0.1,top_p=1,top_k=32,max_output_tokens=4096) -> None:
-        self.logger = Logger.get_logger('gemini_vision.log')
+        self.logger = Logger.get_logger('gemini_vision_pro.log')
+        self.logger.info(f"Initializing Gemini Vision")
         self.model = None
         self.api_key = api_key
         self.temperature = temperature
         self.top_p = top_p
-        self.top_k = top_k
+        self.top_k = int(top_k)
         self.max_output_tokens = max_output_tokens
+        
+        self.logger.info(f"temperature: {self.temperature}")
+        self.logger.info(f"top_p: {self.top_p}")
+        self.logger.info(f"top_k: {self.top_k}")
+        self.logger.info(f"max_output_tokens: {self.max_output_tokens}")
         
         if self.api_key is None:
             self.logger.error("API key is not initialized")

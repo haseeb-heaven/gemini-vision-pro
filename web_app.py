@@ -17,7 +17,7 @@ def init_session_state():
     if 'api_key' not in st.session_state:
         st.session_state['api_key'] = ''
     if 'temperature' not in st.session_state:
-        st.session_state['temperature'] = 0.9
+        st.session_state['temperature'] = 0.1
     if 'top_k' not in st.session_state:
         st.session_state['top_k'] = 32
     if 'top_p' not in st.session_state:
@@ -28,12 +28,6 @@ def init_session_state():
         st.session_state['prompt'] = ''
     if 'api_key' not in st.session_state:
         st.session_state['api_key'] = ''
-    if 'temperature' not in st.session_state:
-        st.session_state['temperature'] = 0.9
-    if 'top_k' not in st.session_state:
-        st.session_state['top_k'] = 32
-    if 'top_p' not in st.session_state:
-        st.session_state['top_p'] = 1.0
     if 'captured_image' not in st.session_state:
         st.session_state['captured_image'] = None
     if 'prompt' not in st.session_state:
@@ -180,7 +174,7 @@ def streamlit_app():
     elif send_button:
         st.warning("Please capture an image first.")
         
-    # Configure Gemini Vision settings from the sidebar
+    # # Configure Gemini Vision settings from the sidebar
     with st.sidebar.title("Settings"):
         st.session_state.api_key = st.sidebar.text_input("API Key", type="password")
         st.session_state.temperature = st.sidebar.slider("Temperature", 0.0, 1.0, 0.9)
