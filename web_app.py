@@ -129,37 +129,6 @@ def capture_image():
     web_image = Image.open(web_image_file)
     return web_image
 
-#@exception_handler
-# def capture_frame(webrtc_ctx):
-#     st.info("Attempting to capture image from webcam...")
-    
-#     # Check if the WebRTC context is initialized
-#     if webrtc_ctx:
-#         log_webrtc_context_states(webrtc_ctx)
-#         st.info(f"WebRTC context is initialized: {webrtc_ctx}")
-        
-#         # Check if the video receiver is initialized
-#         if webrtc_ctx.video_receiver:
-#             st.info("WebRTC video receiver is initialized.")
-#             frame = webrtc_ctx.video_receiver.get_frame()
-            
-#             # Check if a frame is received
-#             if frame is not None:
-#                 st.info("Frame captured from webcam.")
-#                 img = frame.to_ndarray(format="rgba")
-#                 img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
-#                 return img
-#             else:
-#                 st.error("No frame captured from webcam.")
-#                 raise ValueError("Could not capture frame from webcam.")
-#         else:
-#             st.error("WebRTC video receiver is not initialized.")
-#             raise ValueError("WebRTC video receiver is not initialized.")
-#     else:
-#         st.error("WebRTC context is not initialized.")
-#         raise ValueError("WebRTC context is not initialized.")
-
-
 # Streamlit App
 def streamlit_app():
     st.title("Gemini Vision Streamlit App")
