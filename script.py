@@ -263,10 +263,22 @@ def streamlit_app():
     # if response is present then display it
     if 'response' in st.session_state:
         st.code(f"Gemini AI: {st.session_state['response']}", language="python")
-                    
+        
+# create method to update pip using subprocess
+def update_pip():
+    import subprocess
+    subprocess.check_call(["python", "-m", "pip", "install", "--upgrade", "pip"])
+    
+# create method to install required packages using subprocess
+def install_packages():
+    import subprocess
+    subprocess.check_call(["python", "-m", "pip", "install", "-r", "requirements.txt"])
+
 if __name__ == "__main__":
     try:
         init_session_state()
+        update_pip()
+        install_packages()
         streamlit_app()
     except Exception as exception:
         import traceback
