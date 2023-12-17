@@ -48,8 +48,8 @@ class GeminiVision:
             }
 
             self.model = genai.GenerativeModel(model_name="gemini-pro-vision",generation_config=generation_config)
-        except Exception as e:
-            self.logger.error(f"Error setting up model: {e}")
+        except Exception as exception:
+            self.logger.error(f"Error setting up model: {exception}")
             raise
 
     def generate_content(self, contents):
