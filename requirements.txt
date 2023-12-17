@@ -7,3 +7,4 @@ python-dotenv
 SpeechRecognition
 streamlit
 streamlit_webrtc
+google-generativeai
