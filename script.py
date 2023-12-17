@@ -305,5 +305,6 @@ if __name__ == "__main__":
         
     except Exception as exception:
         import traceback
-        print(f"An error occurred: {exception}")
-        print(traceback.format_exc())
+        st.session_state.logger.error(f"An error occurred: {exception}")
+        st.session_state.logger.error(traceback.format_exc())
+        st.error(f"An error occurred: {exception}")
