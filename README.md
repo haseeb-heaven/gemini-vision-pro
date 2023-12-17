@@ -61,6 +61,10 @@ The core AI sections of this project include:
 
 ## **WebUI - Application Showcase**
 
+### YouTube demo:
+[![Gemini Vision demo](https://i.ibb.co/0c0kzXY/gemini-youtube-img.png)](https://www.youtube.com/shorts/DkwDIDc0ufI)
+
+
 ### Webcam with live feed:
 
 <img src="https://i.ibb.co/wMLp5FX/gemini-ai-webcam.png" alt="Webcam with live feed" width="720" height="1280">
