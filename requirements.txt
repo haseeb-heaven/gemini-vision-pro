@@ -1,6 +1,6 @@
 gTTS
 numpy
-opencv_python
+opencv-python-headless
 Pillow
 protobuf
 python-dotenv

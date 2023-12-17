@@ -26,6 +26,7 @@ Date: 17-12-2023
 Version: 1.0
 """
 
+import sys
 import streamlit as st
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
 import cv2
@@ -277,9 +278,21 @@ def install_libgl():
 def install_packages():
     subprocess.check_call(["python", "-m", "pip", "install", "-r", "requirements.txt"])
 
+def install_package(package_name):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+
+def install_system_package(package_name):
+    subprocess.check_call(["sudo", "apt-get", "install", "-y", package_name])
+
+
 if __name__ == "__main__":
     try:
         init_session_state()
+        # Install Python package
+        install_package("opencv-python-headless")
+
+        # Install system package
+        install_system_package("libgl1")
         install_libgl()
         update_pip()
         install_packages()
