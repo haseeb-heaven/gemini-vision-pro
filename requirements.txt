@@ -7,3 +7,4 @@ python-dotenv==1.0.0
 SpeechRecognition==3.10.1
 streamlit==1.29.0
 streamlit_webrtc==0.47.1
+google-generativeai==0.3.1
