@@ -39,6 +39,7 @@ from libs.gemini_vision import GeminiVision
 from libs.speech import SpeechToText
 from libs.voice import TextToSpeech
 from libs.image_cv2 import ImageCV2
+import subprocess
 
 # Initialize session state
 def init_session_state():
@@ -266,17 +267,20 @@ def streamlit_app():
         
 # create method to update pip using subprocess
 def update_pip():
-    import subprocess
     subprocess.check_call(["python", "-m", "pip", "install", "--upgrade", "pip"])
+
+def install_libgl():
+    subprocess.run(['sudo', 'apt-get', 'update'], check=True)
+    subprocess.run(['sudo', 'apt-get', 'install', '-y', 'libgl1-mesa-glx'], check=True)
     
 # create method to install required packages using subprocess
 def install_packages():
-    import subprocess
     subprocess.check_call(["python", "-m", "pip", "install", "-r", "requirements.txt"])
 
 if __name__ == "__main__":
     try:
         init_session_state()
+        install_libgl()
         update_pip()
         install_packages()
         streamlit_app()
