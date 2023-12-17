@@ -3,7 +3,6 @@ import cv2
 from libs.logger import Logger
 from PIL import Image
 import numpy as np
-import pyautogui
 
 class ImageCV2:
     
@@ -89,5 +88,4 @@ class ImageCV2:
         
     def stop_webcam_feed(self,interval):
         time.sleep(interval)
-        pyautogui.press('q')
 
