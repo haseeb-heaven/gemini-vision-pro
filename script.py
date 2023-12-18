@@ -2,30 +2,13 @@
 Description: This is the amazing Google Gemini Vision Pro.
 This scans the image and using Gemini AI pro vision API it generates the descrption of the image.
 It also uses the speech to text and text to speech to speak the prompt and display the description of the image.
-It also uses the webcam to capture the image and display it.
-
-Features:
-1. Webcam detection using WebRTC, OpenCV and PIL
-2. Speech to text using Google Cloud Speech to Text API
-3. Text to speech using Google Cloud Text to Speech API
-4. Image processing using Gemini AI Pro Vision API
-5. Logging using Python logging module
-6. Error handling using Python exception handling
-
-Modules used:
-1. Streamlit - Is is the Web App framework used to build the app
-2. Streamlit Webrtc - It is used to capture the image from the webcam
-3. OpenCV - It is used to capture the image from the webcam
-4. PIL - It is image processing library used to convert the image.
-5. gTTS - It is used to convert the text to speech
-6. SpeechRecognition - It is used to convert the speech to text
-7. google.cloud.speech - It is used to convert the speech to text
 
 Author: HeavenHM
 Date: 17-12-2023
 Version: 1.0
 """
 
+import os
 import sys
 import streamlit as st
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
@@ -39,7 +22,7 @@ from libs.logger import Logger
 from libs.gemini_vision import GeminiVision
 from libs.speech import SpeechToText
 from libs.voice import TextToSpeech
-from libs.image_cv2 import ImageCV2
+from libs.image_cv2 import ImageCV2, ImageTransformer
 import subprocess
 
 # Initialize session state
@@ -74,6 +57,22 @@ def init_session_state():
         st.session_state["webrtc_ctx"] = None
     if "response" not in st.session_state:
         st.session_state["response"] = None
+    if "imageCv2" not in st.session_state:
+        st.session_state["imageCv2"] = None
+
+def display_support():
+    st.markdown("<div style='text-align: center;'>Share and Support</div>", unsafe_allow_html=True)
+    
+    st.write("""
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <ul style="list-style-type: none; margin: 0; padding: 0; display: flex;">
+                <li style="margin-right: 10px;"><a href="https://twitter.com/haseeb_heaven" target="_blank"><img src="https://img.icons8.com/color/32/000000/twitter--v1.png"/></a></li>
+                <li style="margin-right: 10px;"><a href="https://www.buymeacoffee.com/haseebheaven" target="_blank"><img src="https://img.icons8.com/color/32/000000/coffee-to-go--v1.png"/></a></li>
+                <li style="margin-right: 10px;"><a href="https://www.youtube.com/@HaseebHeaven/videos" target="_blank"><img src="https://img.icons8.com/color/32/000000/youtube-play.png"/></a></li>
+                <li><a href="https://github.com/haseeb-heaven/LangChain-Coder" target="_blank"><img src="https://img.icons8.com/color/32/000000/github--v1.png"/></a></li>
+            </ul>
+        </div>
+    """, unsafe_allow_html=True)
 
 # Exception handling decorator
 def exception_handler(func):
@@ -114,55 +113,21 @@ def get_prompt_from_mic():
     return prompt
 
 @exception_handler
-def log_webrtc_context_states(webrtc_ctx):
-    if webrtc_ctx is not None:
-        # Log the state of the WebRTC context
-        st.session_state.logger.info(f"WebRTC context: {webrtc_ctx}")
-        st.session_state.logger.info(f"Is WebRTC playing: {webrtc_ctx.state.playing}")
-        st.session_state.logger.info(f"Is audio receiver ready: {webrtc_ctx.audio_receiver}")
-        st.session_state.logger.info(f"Is video receiver ready: {webrtc_ctx.video_receiver}")
-    else:
-        st.error("WebRTC context is None.")
-
-
-@exception_handler
-def capture_image():
+def capture_image(ctx):
+    webcam_file_path = "webcam_snapshot.png"
+        
     st.session_state.logger.info("Attempting to capture image from webcam with ImageCV2...")
     
-    # Capture the image from the webcam
-    web_image = None
-    web_cam = ImageCV2()
- 
-    web_image_file = "web_image.png"
-    web_image = web_cam.capture_image_from_webcam(web_image_file)
-    if web_image is None:
-        raise ValueError("Could not capture image from webcam")
+    if st.session_state.imageCv2 is None:
+        st.session_state.imageCv2 = ImageCV2()
     
-    # convert web_image from RGB to RGBA
-    web_image = web_image.convert("RGBA")
+    if ctx.video_transformer is None or ctx.video_transformer.in_image is None:
+        st.error("Cannot capture image. Make sure your webcam is connected and not being used by another application.")
+        return None
     
-    # Validate that an image is present
-    image_path = Path(web_image_file)
-    validate_image(image_path)
+    image = st.session_state.imageCv2 .capture_image_from_webcam(ctx, webcam_file_path)
     
-    # Open the image
-    st.session_state.logger.info(f"Trying to open image: {web_image_file}")
-    web_image = Image.open(web_image_file)
-    return web_image
-
-def display_support():
-    st.markdown("<div style='text-align: center;'>Share and Support</div>", unsafe_allow_html=True)
-    
-    st.write("""
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <ul style="list-style-type: none; margin: 0; padding: 0; display: flex;">
-                <li style="margin-right: 10px;"><a href="https://twitter.com/haseeb_heaven" target="_blank"><img src="https://img.icons8.com/color/32/000000/twitter--v1.png"/></a></li>
-                <li style="margin-right: 10px;"><a href="https://www.buymeacoffee.com/haseebheaven" target="_blank"><img src="https://img.icons8.com/color/32/000000/coffee-to-go--v1.png"/></a></li>
-                <li style="margin-right: 10px;"><a href="https://www.youtube.com/@HaseebHeaven/videos" target="_blank"><img src="https://img.icons8.com/color/32/000000/youtube-play.png"/></a></li>
-                <li><a href="https://github.com/haseeb-heaven/LangChain-Coder" target="_blank"><img src="https://img.icons8.com/color/32/000000/github--v1.png"/></a></li>
-            </ul>
-        </div>
-    """, unsafe_allow_html=True)
+    return Image.open(image)
 
 # Streamlit App
 def streamlit_app():    
@@ -205,30 +170,15 @@ def streamlit_app():
                                                       top_p=st.session_state['top_p'],
                                                       top_k=st.session_state['top_k'])
     
+    # Webcam for capturing images
+    st.title("Webcam")
+    capture_ctx = webrtc_streamer(key="snapshot", video_transformer_factory=ImageTransformer)
 
-    # WebRTC streamer only if image is not captured
-    webrtc_ctx = webrtc_streamer(
-                key="webcam", 
-                mode=WebRtcMode.SENDRECV, 
-                rtc_configuration=RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}),
-                video_frame_callback=lambda frame: None
-            )
-   
-    col1, col2,_,col3 = st.columns(4)
+    col1, col2,_,col3, = st.columns(4)
 
     with col1:
         if st.button("Capture Image"):
-            
-            # Validate API Key
-            if st.session_state.api_key is None or st.session_state.api_key == '':
-                st.toast("Please enter API Key in the sidebar.", icon="❌")
-                
-            else:
-                st.session_state['captured_image'] = capture_image()
-                if st.session_state['captured_image'] is not None:
-                    st.toast("Image captured successfully!")
-                else:
-                    st.warning("Failed to capture image. Please try again.")
+            st.session_state['captured_image'] = capture_image(capture_ctx)
 
     # Main Page
     with col2:

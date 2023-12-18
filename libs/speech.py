@@ -1,8 +1,10 @@
+import os
 import sounddevice as sd
 import numpy as np
 import whisper
 import logging
 import wavio
+from libs.logger import Logger
 
 class SpeechToText:
     """
@@ -13,8 +15,7 @@ class SpeechToText:
         self.model = whisper.load_model("base")
         self.duration = duration
         self.fs = fs
-        self.logger = logging.getLogger(__name__)
-        logging.basicConfig(level=logging.INFO)
+        self.logger = Logger.get_logger("gemini_vision_pro.log")
 
     def record_audio(self):
         """
@@ -37,6 +38,7 @@ class SpeechToText:
             result = self.model.transcribe("temp.wav")
             text = result["text"]
             self.logger.info(f"Converted text: {text}")
+            os.remove("temp.wav")
             return text
-        except Exception as e:
-            self.logger.error(f"Error in Whisper speech recognition: {str(e)}")
+        except Exception as exception:
+            self.logger.error(f"Error in Whisper speech recognition: {str(exception)}")

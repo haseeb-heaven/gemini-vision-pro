@@ -1,91 +1,43 @@
 import time
 import cv2
 from libs.logger import Logger
-from PIL import Image
-import numpy as np
+from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
+
+class ImageTransformer(VideoTransformerBase):
+    def __init__(self):
+        self.in_image = None
+
+    def transform(self, frame):
+        self.in_image = frame.to_ndarray(format="bgr24")
+        return self.in_image
 
 class ImageCV2:
+    # Assuming other parts of the class are defined above
+
+    def __init__(self):
+        self.logger = Logger.get_logger("gemini_vision_pro.txt")
+        self.logger.info("Initializing ImageCV2")
     
-    def __init__(self) -> None:
-        # Set up logging
-        self.logger = Logger.get_logger('gemini_vision.log')
-        
-    def open_webcam(self):
-        cap = cv2.VideoCapture(0)
-        if not cap.isOpened():
-            self.logger.error("Cannot open webcam")
-            return None
-        return cap
+    def capture_image_from_webcam(self, ctx, image_name):
+        self.logger.info("Capturing image from webcam")
 
-    def capture_image(self, cap):
-        ret, frame = cap.read()
-        self.logger.info(f"Capturing image from webcam")
-        
-        if not ret:
+        # Check if the webcam context is initialized
+        if ctx is None:
+            self.logger.error("Webcam context is None")
+            raise ValueError("Webcam context is not initialized")
+
+        # Check if the video transformer and the image in the transformer are available
+        if ctx.video_transformer is None or ctx.video_transformer.in_image is None:
             self.logger.error("Cannot capture image")
-            return None
+            raise ValueError("Cannot capture image from webcam")
 
-        self.logger.info(f"Converting image PIL.Image")
-        # Convert the numpy.ndarray to a PIL.Image.Image
-        image = Image.fromarray(frame)
-        
-        self.logger.info(f"Converting image success")
-        return image
-    
-    def save_image(self, image, filename):
-        self.logger.info(f"Saving image to: {filename}")
-        
-        # Convert the PIL.Image.Image back to a numpy.ndarray
-        frame = np.array(image)
-        
-        # Save the image
-        cv2.imwrite(filename, frame)
-        
-    def capture_image_from_webcam(self,image_name):
-        self.logger.info(f"Capturing image from webcam")
-        #time.sleep(5)
-                
-        cap = self.open_webcam()
-        time.sleep(1)
-        
-        if cap is None:
-            self.logger.error("Cannot open webcam")
-            return None
+        # Check if the webcam is streaming
+        if not ctx.state.playing:
+            self.logger.warning("Webcam is not streaming")
+            raise RuntimeError("Webcam is not streaming")
 
-        image = self.capture_image(cap)
-        
-        # Check if frame is None
-        if image is None:
-            self.logger.error("Cannot capture image")
-            return None
-        
-        time.sleep(1)
-        
-        # Save the image
-        self.save_image(image, image_name)
+        # Capture and save the image
+        image = ctx.video_transformer.in_image
+        cv2.imwrite(image_name, image)
         self.logger.info(f"Saved image to: {image_name}")
-
-        return image
-    
-    def show_webcam_feed(self):
-        # Open the webcam (0 is the default webcam)
-        cap = cv2.VideoCapture(0)
-
-        while True:
-            # Capture frame-by-frame
-            ret, frame = cap.read()
-
-            # Display the resulting frame
-            cv2.imshow('Webcam Feed', frame)
-
-            # Break the loop on 'q' key press
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
-        # When everything is done, release the capture and destroy the window
-        cap.release()
-        cv2.destroyAllWindows()
-        
-    def stop_webcam_feed(self,interval):
-        time.sleep(interval)
-
+        return image_name
