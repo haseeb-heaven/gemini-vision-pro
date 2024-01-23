@@ -1,7 +1,7 @@
 gTTS==2.4.0
 numpy==1.26.2
 opencv_python==4.8.1.78
-Pillow==10.1.0
+Pillow==10.2.0
 protobuf==4.25.1
 python-dotenv==1.0.0
 SpeechRecognition==3.10.1
